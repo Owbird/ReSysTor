@@ -2,11 +2,13 @@
 package server
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 
 	"github.com/owbird/resystor/internal/monitor"
 	"github.com/rs/cors"
@@ -27,7 +29,47 @@ const (
 	PORT = 8080
 )
 
+func runCmd(cmd string, args ...string) error {
+	command := exec.Command(cmd, args...)
+
+	stdout, err := command.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	stderr, err := command.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	if err := command.Start(); err != nil {
+		return err
+	}
+
+	scanOutput := func(pipe *bufio.Scanner) {
+		for pipe.Scan() {
+			line := pipe.Text()
+
+			fmt.Println(line)
+		}
+	}
+
+	stdoutScanner := bufio.NewScanner(stdout)
+	stderrScanner := bufio.NewScanner(stderr)
+
+	go scanOutput(stdoutScanner)
+	go scanOutput(stderrScanner)
+
+	if err := command.Wait(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewServer() *Server {
+	go runCmd("npm", "run", "build:start", "--prefix", "frontend")
+
 	viper.SetConfigName("resystor")
 	viper.SetConfigType("toml")
 

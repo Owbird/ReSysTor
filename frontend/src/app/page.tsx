@@ -83,7 +83,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filesystems.map((filesystem) => (
-              <div className="border rounded-lg p-4 bg-white shadow-md">
+              <div key={filesystem.device} className="border rounded-lg p-4 bg-white shadow-md">
                 <h3 className="font-bold">{filesystem.device}</h3>
                 <p>Disk Type: {filesystem.disk_type}</p>
                 <p>Path: {filesystem.path}</p>
@@ -101,7 +101,7 @@ export default function Home() {
           <h3 className="text-xl font-bold mb-2">Processes</h3>
           <div className="max-h-screen overflow-scroll grid grid-cols-1 md:grid-cols-2 gap-4">
             {processes.map((process) => (
-              <div className="border rounded-lg p-4 bg-white shadow-md">
+              <div key={process.pid} className="border rounded-lg p-4 bg-white shadow-md">
                 <h3 className="font-bold">{process.name}</h3>
                 <p>Username: {process.username}</p>
                 <p>PID: {process.pid}</p>
