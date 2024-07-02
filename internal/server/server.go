@@ -1,4 +1,3 @@
-// Package server handles the file hosting server
 package server
 
 import (
@@ -31,6 +30,8 @@ const (
 
 func runCmd(cmd string, args ...string) error {
 	command := exec.Command(cmd, args...)
+
+	log.Println("[+] Running ", command.String())
 
 	stdout, err := command.StdoutPipe()
 	if err != nil {
@@ -68,6 +69,7 @@ func runCmd(cmd string, args ...string) error {
 }
 
 func NewServer() *Server {
+	go runCmd("npx", "localtunnel", "--port", "3000")
 	go runCmd("npm", "run", "build:start", "--prefix", "frontend")
 
 	viper.SetConfigName("resystor")
