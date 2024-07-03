@@ -117,15 +117,33 @@ func (s *Server) getServerConfig(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Server) getStats(w http.ResponseWriter, r *http.Request) {
-	resources, _ := s.Monitor.GetSystemResources()
-	processes, _ := s.Monitor.GetSystemProcesses()
-	fileSystems, _ := s.Monitor.GetFileSystems()
+	resources, err := s.Monitor.GetSystemResources()
+	if err != nil {
+		http.Error(w, "Failed to System stats", http.StatusInternalServerError)
+		return
+	}
 
-	json, _ := json.Marshal(map[string]interface{}{
+	processes, err := s.Monitor.GetSystemProcesses()
+	if err != nil {
+		http.Error(w, "Failed to System stats", http.StatusInternalServerError)
+		return
+	}
+
+	fileSystems, err := s.Monitor.GetFileSystems()
+	if err != nil {
+		http.Error(w, "Failed to System stats", http.StatusInternalServerError)
+		return
+	}
+
+	json, err := json.Marshal(map[string]interface{}{
 		"resources":   resources,
 		"processes":   processes,
 		"filesystems": fileSystems,
 	})
+	if err != nil {
+		http.Error(w, "Failed to System stats", http.StatusInternalServerError)
+		return
+	}
 
 	w.Write(json)
 }
