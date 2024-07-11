@@ -15,8 +15,8 @@ import (
 )
 
 type Config struct {
-	Name     string
-	Interval int
+	Name     string `json:"name"`
+	Interval int    `json:"interval"`
 }
 
 type Server struct {
