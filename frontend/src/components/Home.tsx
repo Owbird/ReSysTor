@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return "0 Bytes";
@@ -18,6 +19,16 @@ interface Props {
 
 export default function Home({ name, interval }: Props) {
   const [monitorData, setMontitorData] = useState<MonitorData | null>();
+
+  const getGaugeColor = (value: number) => {
+    if (value < 50) {
+      return "green";
+    } else if (value >= 50 && value <= 70) {
+      return "yellow";
+    } else {
+      return "red";
+    }
+  };
 
   const getData = async () => {
     const res = await fetch(`http://localhost:8080`);
@@ -78,8 +89,21 @@ export default function Home({ name, interval }: Props) {
               <p>Cores: {resources.cpu_stats.cores}</p>
               <div className="grid grid-cols-4">
                 {resources.cpu_stats.usages.map((cpu, index) => (
-                  <div key={index}>
-                    CPU #{index + 1}: {cpu.toFixed(2)}%
+                  <div key={index} className="flex flex-col justify-center items-center">
+                    <p>CPU {index + 1}</p>
+                    <Gauge
+                      width={100}
+                      height={100}
+                      value={cpu}
+                      text={`${cpu.toFixed(0)}%`}
+                      valueMin={0}
+                      valueMax={100}
+                      sx={{
+                        [`& .${gaugeClasses.valueArc}`]: {
+                          fill: getGaugeColor(cpu),
+                        },
+                      }}
+                    />
                   </div>
                 ))}
               </div>
