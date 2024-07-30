@@ -70,7 +70,7 @@ func runCmd(cmd string, args ...string) error {
 
 func NewServer() *Server {
 	go runCmd("npx", "localtunnel", "--port", "3000")
-	go runCmd("npm", "run", "build:start", "--prefix", "frontend")
+	go runCmd("npm", "run", "start", "--prefix", "frontend")
 
 	viper.SetConfigName("resystor")
 	viper.SetConfigType("toml")
