@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
 
 const formatBytes = (bytes: number): string => {
@@ -19,6 +19,7 @@ interface Props {
 
 export default function Home({ name, interval }: Props) {
   const [monitorData, setMontitorData] = useState<MonitorData | null>();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getGaugeColor = (value: number) => {
     if (value < 50) {
@@ -48,9 +49,30 @@ export default function Home({ name, interval }: Props) {
     return () => clearInterval(intervalFn);
   }, []);
 
+  const filteredProcesses = useMemo(() => {
+    const processes = monitorData?.processes ?? [];
+
+    if (!searchQuery) {
+      return processes;
+    }
+
+    return processes.filter(
+      (process) =>
+        process.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        process.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        process.pid.toString().includes(searchQuery),
+    );
+  }, [monitorData, searchQuery]);
+
+  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+
+    setSearchQuery(query);
+  };
+
   if (!monitorData) return <div></div>;
 
-  const { resources, processes, filesystems } = monitorData;
+  const { resources, filesystems } = monitorData;
 
   return (
     <main>
@@ -89,7 +111,10 @@ export default function Home({ name, interval }: Props) {
               <p>Cores: {resources.cpu_stats.cores}</p>
               <div className="grid grid-cols-4">
                 {resources.cpu_stats.usages.map((cpu, index) => (
-                  <div key={index} className="flex flex-col justify-center items-center">
+                  <div
+                    key={index}
+                    className="flex flex-col justify-center items-center"
+                  >
                     <p>CPU {index + 1}</p>
                     <Gauge
                       width={100}
@@ -136,8 +161,13 @@ export default function Home({ name, interval }: Props) {
 
         <div className="mt-4">
           <h3 className="text-xl font-bold mb-2">Processes</h3>
+          <input
+            onChange={handleSearch}
+            placeholder="Search PID, Name, Username"
+            className="border rounded-lg p-2 mb-2"
+          />
           <div className="max-h-screen overflow-scroll grid grid-cols-1 md:grid-cols-2 gap-4">
-            {processes.map((process) => (
+            {filteredProcesses.map((process) => (
               <div
                 key={process.pid}
                 className="border rounded-lg p-4 bg-white shadow-md"
