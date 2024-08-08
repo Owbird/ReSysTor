@@ -1,4 +1,4 @@
-build:
+build_frontend:
 	@clear
 
 	@echo "Installing dependencies"
@@ -6,8 +6,13 @@ build:
 
 	@echo "Compiling frontend"
 	@npx pnpm -C frontend build
-	
-	@echo "Compiling resystor"
-	@go build -o resystor .
 
-	@echo "Compiled successfully"
+	@echo "Compiled frontend successfully"
+
+compile_local: build_frontend
+		@echo "Compiling ReSysTor"
+		goreleaser build --snapshot --verbose --clean
+
+release: build_frontend
+	goreleaser release
+
