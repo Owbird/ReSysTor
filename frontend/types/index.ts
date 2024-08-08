@@ -1,3 +1,8 @@
+interface ServerConfig {
+  name: string;
+  interval: string;
+}
+
 interface MonitorData {
   filesystems: Filesystem[];
   processes: Process[];

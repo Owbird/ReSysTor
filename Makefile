@@ -2,10 +2,10 @@ build:
 	@clear
 
 	@echo "Installing dependencies"
-	@npm install --prefix frontend
+	@npx --yes pnpm -C frontend install
 
 	@echo "Compiling frontend"
-	@npm run build --prefix frontend
+	@npx pnpm -C frontend build
 	
 	@echo "Compiling resystor"
 	@go build -o resystor .

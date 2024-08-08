@@ -1,13 +1,16 @@
 package server
 
 import (
-	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
+	"time"
 
 	"github.com/owbird/resystor/internal/monitor"
 	"github.com/rs/cors"
@@ -28,49 +31,34 @@ const (
 	PORT = 8080
 )
 
-func runCmd(cmd string, args ...string) error {
-	command := exec.Command(cmd, args...)
+func NewServer(currentDir string) *Server {
+	cmd := exec.Command("npx", "--yes", "serve", "-s", fmt.Sprintf("%v/frontend/out", currentDir))
 
-	log.Println("[+] Running ", command.String())
+	var stdBuffer bytes.Buffer
 
-	stdout, err := command.StdoutPipe()
-	if err != nil {
-		return err
-	}
+	stdOutStr := strings.Builder{}
 
-	stderr, err := command.StderrPipe()
-	if err != nil {
-		return err
-	}
+	mw := io.MultiWriter(os.Stdout, &stdBuffer, &stdOutStr)
 
-	if err := command.Start(); err != nil {
-		return err
-	}
+	cmd.Stdout = mw
+	cmd.Stderr = mw
 
-	scanOutput := func(pipe *bufio.Scanner) {
-		for pipe.Scan() {
-			line := pipe.Text()
+	go cmd.Run()
 
-			fmt.Println(line)
+	for range time.Tick(time.Second * 5) {
+		if strings.Contains(stdBuffer.String(), "Accepting") {
+			log.Println("Getting tunnel url")
+			cmd := exec.Command("npx", "--yes", "localtunnel", "--port", "3000")
+
+			mw := io.MultiWriter(os.Stdout, &stdBuffer, &stdOutStr)
+
+			cmd.Stdout = mw
+			cmd.Stderr = mw
+
+			go cmd.Run()
+			break
 		}
 	}
-
-	stdoutScanner := bufio.NewScanner(stdout)
-	stderrScanner := bufio.NewScanner(stderr)
-
-	go scanOutput(stdoutScanner)
-	go scanOutput(stderrScanner)
-
-	if err := command.Wait(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func NewServer() *Server {
-	go runCmd("npx", "localtunnel", "--port", "3000")
-	go runCmd("npm", "run", "start", "--prefix", "frontend")
 
 	viper.SetConfigName("resystor")
 	viper.SetConfigType("toml")

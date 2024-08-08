@@ -13,11 +13,12 @@ const formatBytes = (bytes: number): string => {
 };
 
 interface Props {
-  name: string;
-  interval: string;
+  config: ServerConfig;
 }
 
-export default function Home({ name, interval }: Props) {
+export default function Home({ config }: Props) {
+  const { name, interval } = config;
+
   const [monitorData, setMontitorData] = useState<MonitorData | null>();
   const [searchQuery, setSearchQuery] = useState("");
 
