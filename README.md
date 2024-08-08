@@ -2,6 +2,8 @@
 
 This is ReSysTor, a dead simple **RE**mote **SYS**tem moni**TOR**!
 
+![ss](./assets/ss.png)
+
 ## Overview
 
 ReSysTor is a lightweight, easy-to-use remote system monitoring tool designed to provide you with real-time insights into your system's performance.
@@ -22,20 +24,22 @@ ReSysTor is a lightweight, easy-to-use remote system monitoring tool designed to
 ### Installation
 
 1. Clone the repository:
-    ```sh
-    git clone https://github.com/Owbird/ReSysTor.git
-    cd ReSysTor
-    ```
+
+   ```sh
+   git clone https://github.com/Owbird/ReSysTor.git
+   cd ReSysTor
+   ```
 
 2. Install dependencies:
-    ```sh
-    go mod download
-    ```
+
+   ```sh
+   go mod download
+   ```
 
 3. Build the project:
-    ```sh
+   ```sh
    make build
-    ```
+   ```
 
 ### Configuration
 
@@ -45,12 +49,13 @@ Example configuration (`resystor.toml`):
 
 ```toml
 name = "Hostname"
-interval = 5 # Polling interval of 5s  
+interval = 5 # Polling interval of 5s
 ```
 
 ### Running ReSysTor
 
 To start monitoring, simply run:
+
 ```sh
 ./resystor
 ```
