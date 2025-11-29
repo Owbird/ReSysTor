@@ -6,6 +6,7 @@ import {
   GetHostname,
 } from "./actions/Monitor";
 import "./App.css";
+import { Helmet } from "react-helmet";
 
 const ProgressBar = ({ value = 0, label }) => {
   const displayValue = value ? value.toFixed(1) : "0.0";
@@ -58,13 +59,19 @@ function App() {
   }, []);
 
   const { cpu_stats, memory_stats, battery_stats, uptime, local_ip } =
-    resources 
+    resources;
 
   const rootFileSystem = fileSystems.find((fs) => fs.path === "/");
 
+  const title = `${hostname || "ReSysTor"} System Monitor`;
+
   return (
     <div className="container">
-      <h1>{hostname || "ReSysTor"} System Monitor</h1>
+      <Helmet>
+        <title>ReSysTor - {title}</title>
+      </Helmet>
+
+      <h1>{title}</h1>
 
       <div className="grid">
         <Card title="System Information">

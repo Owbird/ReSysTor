@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/distatus/battery v0.11.0
-	github.com/owbird/raijin v0.0.0-20251129075210-297ea5106ed7
+	github.com/owbird/raijin v0.0.0-20251129082754-be0035d53263
 	github.com/rs/cors v1.11.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/cobra v1.10.1
