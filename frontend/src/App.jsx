@@ -3,6 +3,7 @@ import {
   GetSystemProcesses,
   GetFileSystems,
   GetSystemResources,
+  GetHostname,
 } from "./actions/Monitor";
 import "./App.css";
 
@@ -30,15 +31,21 @@ function App() {
   const [processes, setProcesses] = useState([]);
   const [fileSystems, setFileSystems] = useState([]);
   const [resources, setResources] = useState({});
+  const [hostname, setHostname] = useState("");
 
   const fetchData = async () => {
     try {
-      const [processesData, resourcesData, fileSystemsData] = await Promise.all(
-        [GetSystemProcesses(), GetSystemResources(), GetFileSystems()],
-      );
+      const [processesData, resourcesData, fileSystemsData, hostnameData] =
+        await Promise.all([
+          GetSystemProcesses(),
+          GetSystemResources(),
+          GetFileSystems(),
+          GetHostname(),
+        ]);
       setProcesses((processesData && processesData[0]) || []);
       setResources((resourcesData && resourcesData[0]) || {});
       setFileSystems((fileSystemsData && fileSystemsData[0]) || []);
+      setHostname((hostnameData && hostnameData[0]) || "");
     } catch (error) {
       console.error("Failed to fetch system data:", error);
     }
@@ -51,13 +58,13 @@ function App() {
   }, []);
 
   const { cpu_stats, memory_stats, battery_stats, uptime, local_ip } =
-    resources;
+    resources 
 
   const rootFileSystem = fileSystems.find((fs) => fs.path === "/");
 
   return (
     <div className="container">
-      <h1>ReSysTor System Monitor</h1>
+      <h1>{hostname || "ReSysTor"} System Monitor</h1>
 
       <div className="grid">
         <Card title="System Information">

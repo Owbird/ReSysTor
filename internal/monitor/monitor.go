@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"math"
+	"os"
 	"strings"
 
 	"github.com/distatus/battery"
@@ -16,6 +17,11 @@ import (
 type Monitor struct{}
 
 func NewMonitor() *Monitor { return &Monitor{} }
+
+func (m *Monitor) GetHostname() (string, error) {
+	hostname, err := os.Hostname()
+	return hostname, err
+}
 
 func (m *Monitor) GetSystemResources() (data.SystemResources, error) {
 	stats := data.SystemResources{}
