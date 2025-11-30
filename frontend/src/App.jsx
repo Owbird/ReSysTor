@@ -27,12 +27,18 @@ const Card = ({ title, children }) => (
 );
 
 const bytesToGB = (bytes) => (bytes / 1024 / 1024 / 1024).toFixed(2);
+const bytesToMB = (bytes) => (bytes / 1024 / 1024).toFixed(2);
 
 function App() {
   const [processes, setProcesses] = useState([]);
   const [fileSystems, setFileSystems] = useState([]);
   const [resources, setResources] = useState({});
   const [hostname, setHostname] = useState("");
+  const [sortConfig, setSortConfig] = useState({
+    key: "cpu_usage",
+    direction: "desc",
+  });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     try {
@@ -58,10 +64,49 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleSort = (key) => {
+    setSortConfig((prevConfig) => {
+      const isAsc = prevConfig.key === key && prevConfig.direction === "asc";
+      return { key, direction: isAsc ? "desc" : "asc" };
+    });
+  };
+
+  const filteredProcesses = processes.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.pid.toString().includes(searchQuery) ||
+      (p.username &&
+        p.username.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const sortedProcesses = [...filteredProcesses].sort((a, b) => {
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+
+    if (aValue < bValue) {
+      return sortConfig.direction === "asc" ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortConfig.direction === "asc" ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const getClassNameForHeader = (key) => {
+    if (sortConfig.key !== key) {
+      return "";
+    }
+    return sortConfig.direction === "asc" ? "sort-asc" : "sort-desc";
+  };
+
   const { cpu_stats, memory_stats, battery_stats, uptime, local_ip } =
     resources;
 
   const rootFileSystem = fileSystems.find((fs) => fs.path === "/");
+
+  const topMemoryProcesses = [...processes]
+    .sort((a, b) => b.memory_usage - a.memory_usage)
+    .slice(0, 5);
 
   const title = `${hostname || "ReSysTor"} System Monitor`;
 
@@ -137,6 +182,17 @@ function App() {
             </div>
           </Card>
         )}
+
+        <Card title="Top 5 Memory Processes">
+          {topMemoryProcesses.map((p) => (
+            <div key={p.pid} className="info-item">
+              <span>
+                {p.pid} - {p.name}
+              </span>
+              <span>{bytesToMB(p.memory_usage)} MB</span>
+            </div>
+          ))}
+        </Card>
       </div>
 
       <div>
@@ -171,30 +227,59 @@ function App() {
 
       <div>
         <h2>Processes</h2>
-        <div className="table-container">
+        <input
+          type="text"
+          placeholder="Search processes..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
+        />
+        <div className="table-container processes-table">
           <table>
             <thead>
               <tr>
-                <th>PID</th>
-                <th>Name</th>
-                <th>User</th>
-                <th>CPU %</th>
-                <th>Mem %</th>
+                <th
+                  onClick={() => handleSort("pid")}
+                  className={getClassNameForHeader("pid")}
+                >
+                  PID
+                </th>
+                <th
+                  onClick={() => handleSort("name")}
+                  className={getClassNameForHeader("name")}
+                >
+                  Name
+                </th>
+                <th
+                  onClick={() => handleSort("username")}
+                  className={getClassNameForHeader("username")}
+                >
+                  User
+                </th>
+                <th
+                  onClick={() => handleSort("cpu_usage")}
+                  className={getClassNameForHeader("cpu_usage")}
+                >
+                  CPU %
+                </th>
+                <th
+                  onClick={() => handleSort("memory_usage")}
+                  className={getClassNameForHeader("memory_usage")}
+                >
+                  Mem %
+                </th>
               </tr>
             </thead>
             <tbody>
-              {processes
-                .sort((a, b) => b.cpu_usage - a.cpu_usage)
-                .slice(0, 15)
-                .map((p) => (
-                  <tr key={p.pid}>
-                    <td>{p.pid}</td>
-                    <td>{p.name}</td>
-                    <td>{p.username || "N/A"}</td>
-                    <td>{p.cpu_usage.toFixed(2)}%</td>
-                    <td>{p.memory_usage.toFixed(2)}%</td>
-                  </tr>
-                ))}
+              {sortedProcesses.map((p) => (
+                <tr key={p.pid}>
+                  <td>{p.pid}</td>
+                  <td>{p.name}</td>
+                  <td>{p.username || "N/A"}</td>
+                  <td>{p.cpu_usage.toFixed(2)}%</td>
+                  <td>{p.memory_usage.toFixed(2)}%</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

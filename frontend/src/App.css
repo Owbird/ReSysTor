@@ -126,6 +126,15 @@ th {
   background-color: #333;
   font-weight: 600;
   color: #fafafa;
+  cursor: pointer;
+}
+
+th.sort-asc::after {
+  content: " ▲";
+}
+
+th.sort-desc::after {
+  content: " ▼";
 }
 
 tbody tr:last-child td {
@@ -155,4 +164,19 @@ tbody tr:hover {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem 1rem;
+}
+
+.processes-table {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background-color: #2c2c2c;
+  color: #fafafa;
 }
